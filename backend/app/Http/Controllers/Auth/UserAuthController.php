@@ -28,14 +28,14 @@ class UserAuthController extends Controller
     }
 
     public function login(Request $request){
-        $loginUserData = $request->validate([
+        $credentials = $request->validate([
             'email'=>'required|string|email',
             'password'=>'required'
         ]);
 
-        $user = User::where('email',$loginUserData['email'])->first();
+        $user = User::where('email',$credentials['email'])->first();
         
-        if(!$user || !Hash::check($loginUserData['password'],$user->password)){
+        if(!$user || !Hash::check($credentials['password'],$user->password)){
             return response()->json([
                 'message' => 'Invalid Credentials'
             ],401);
@@ -45,6 +45,12 @@ class UserAuthController extends Controller
 
         return response()->json([
             'access_token' => $token,
+            'token_type' => 'Bearer',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
         ]);
     }
 
