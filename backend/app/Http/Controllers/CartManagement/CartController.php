@@ -3,47 +3,51 @@
 namespace App\Http\Controllers\CartManagement;
 
 use App\Http\Controllers\Controller;
-use App\Models\CartManagement\Cart;
+use App\Http\Resources\CartManagement\CartResource;
+use App\Models\CartManagement\Product;
+use App\Services\CartManagement\CartService;
+use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(
+        private readonly CartService $cartService
+    )
     {
-        //
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function show(Request $request)
     {
-        //
+        $cart = $this->cartService->getCurrentCart($request);
+
+        return new CartResource($cart->load('cartItems.product'));
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Cart $cart)
+    public function addProduct(Request $request)
     {
-        //
+        $request->validate([
+            'product_id' => ['required', 'exists:products,id'],
+            'quantity' => ['integer', 'min:1']
+        ]);
+
+        $cart = $this->cartService->getCurrentCart($request);
+        $product = Product::findOrFail($request->product_id);
+
+        $cart = $this->cartService->addProductToCart(
+            $cart,
+            $product,
+            $request->quantity ?? 1
+        );
+
+        return new CartResource($cart);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Cart $cart)
+    public function removeProduct(Product $product, Request $request)
     {
-        //
-    }
+        $cart = $this->cartService->getCurrentCart($request);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Cart $cart)
-    {
-        //
+        $cart = $this->cartService->removeProductFromCart($cart, $product);
+
+        return new CartResource($cart);
     }
 }
