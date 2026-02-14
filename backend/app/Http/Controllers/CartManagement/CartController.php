@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\CartManagement;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CartManagement\AddToCartRequest;
 use App\Http\Resources\CartManagement\CartResource;
 use App\Models\CartManagement\Product;
 use App\Services\CartManagement\CartService;
@@ -23,13 +24,8 @@ class CartController extends Controller
         return new CartResource($cart->load('cartItems.product'));
     }
 
-    public function addProduct(Request $request)
+    public function addProduct(AddToCartRequest $request)
     {
-        $request->validate([
-            'product_id' => ['required', 'exists:products,id'],
-            'quantity' => ['integer', 'min:1']
-        ]);
-
         $cart = $this->cartService->getCurrentCart($request);
         $product = Product::findOrFail($request->product_id);
 
