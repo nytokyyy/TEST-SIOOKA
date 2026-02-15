@@ -7,6 +7,7 @@ use App\Http\Requests\CartManagement\AddToCartRequest;
 use App\Http\Resources\CartManagement\CartResource;
 use App\Models\CartManagement\Product;
 use App\Services\CartManagement\CartService;
+use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
@@ -16,16 +17,16 @@ class CartController extends Controller
     {
     }
 
-    public function show(): CartResource      
+    public function show(Request $request): CartResource      
     {
-        $cart = $this->cartService->getCurrentCart();
+        $cart = $this->cartService->getCurrentCart($request);
 
         return new CartResource($cart->load('cartItems.product'));
     }
 
     public function addProduct(AddToCartRequest $request): CartResource
     {
-        $cart = $this->cartService->getCurrentCart();
+        $cart = $this->cartService->getCurrentCart($request);
         $product = Product::findOrFail($request->product_id);
 
         $cart = $this->cartService->addProductToCart(
@@ -37,9 +38,9 @@ class CartController extends Controller
         return new CartResource($cart);
     }
 
-    public function removeProduct(Product $product): CartResource
+    public function removeProduct(Request $request, Product $product): CartResource
     {
-        $cart = $this->cartService->getCurrentCart();
+        $cart = $this->cartService->getCurrentCart($request);
 
         $cart = $this->cartService->removeProductFromCart($cart, $product);
 

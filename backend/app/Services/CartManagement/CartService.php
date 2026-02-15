@@ -4,7 +4,7 @@ namespace App\Services\CartManagement;
 
 use App\Models\CartManagement\Cart;
 use App\Models\CartManagement\Product;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class CartService
 {
@@ -40,11 +40,12 @@ class CartService
         return $cart->load('cartItems.product');
     }
 
-    public function getCurrentCart(): Cart
+    public function getCurrentCart(Request $request): Cart
     {
-        if (Auth::check()) {
+        $user = $request->user('sanctum');
+        if ($user) {
             return Cart::firstOrCreate([
-                'user_id' => Auth::id(),
+                'user_id' => $user->id,
             ]);
         }
 
