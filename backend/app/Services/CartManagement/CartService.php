@@ -4,7 +4,9 @@ namespace App\Services\CartManagement;
 
 use App\Models\CartManagement\Cart;
 use App\Models\CartManagement\Product;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CartService
 {
@@ -55,5 +57,33 @@ class CartService
         return Cart::firstOrCreate([
             'session_id' => $sessionId,
         ]);
+    }
+
+    public function mergeSessionCartToUserCart(User $user)
+    {
+        $sessionId = session()->getId();
+
+        $sessionCart = Cart::where('session_id', $sessionId)->first();
+        $userCart = Cart::firstOrCreate(['user_id' => $user->id]);
+
+        if ($sessionCart) {
+            DB::transaction(function () use ($sessionCart, $userCart) {
+                foreach ($sessionCart->cartItems as $item) {
+                    $existingItem = $userCart->cartItems()
+                        ->where('product_id', $item->product_id)
+                        ->first();
+
+                    if ($existingItem) {
+                        $existingItem->increment('quantity', $item->quantity);
+                    } else {
+                        $userCart->cartItems()->create([
+                            'product_id' => $item->product_id,
+                            'quantity' => $item->quantity,
+                        ]);
+                    }
+                }
+                $sessionCart->delete();
+            });
+        }
     }
 }

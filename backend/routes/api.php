@@ -13,7 +13,10 @@ Route::get('/user', function (Request $request) {
 /** AUTH START */
 Route::controller(UserAuthController::class)->group(function () {
     Route::post('register', 'register');
-    Route::post('login', 'login');
+    
+    Route::middleware(StartSession::class)->group(function () {
+        Route::post('login', 'login');
+    });
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', 'logout');

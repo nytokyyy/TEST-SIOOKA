@@ -4,11 +4,18 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\CartManagement\CartService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class UserAuthController extends Controller
 {
+    public function __construct(
+        private readonly CartService $cartService
+    )
+    {
+    }
+
     public function register(Request $request){
         $registerUserData = $request->validate([
             'name'=>'required|string',
@@ -40,6 +47,9 @@ class UserAuthController extends Controller
                 'message' => 'Invalid Credentials'
             ],401);
         }
+
+        // merge guest cart with user cart if exists
+        $this->cartService->mergeSessionCartToUserCart($user);
 
         $token = $user->createToken($user->name.'-AuthToken')->plainTextToken;
 
