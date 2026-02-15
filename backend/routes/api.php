@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\UserAuthController;
 use App\Http\Controllers\CartManagement\CartController;
+use App\Http\Controllers\CartManagement\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
@@ -13,7 +14,7 @@ Route::get('/user', function (Request $request) {
 /** AUTH START */
 Route::controller(UserAuthController::class)->group(function () {
     Route::post('register', 'register');
-    
+
     Route::middleware(StartSession::class)->group(function () {
         Route::post('login', 'login');
     });
@@ -27,7 +28,15 @@ Route::controller(UserAuthController::class)->group(function () {
 /** CART START */
 Route::controller(CartController::class)->prefix('cart')->middleware(StartSession::class)->group(function () {
     Route::get('/', 'show');
-    Route::post('/add-product', 'addProduct');
-    Route::delete('/remove-product/{product}', 'removeProduct');
+    Route::post('/items', 'addProduct');
+    Route::patch('/items/{product}', 'changeQuantity');
+    Route::delete('/items/{product}', 'removeProduct');
 });
 /** CART END */
+
+/** PRODUCTS START */
+Route::controller(ProductController::class)->prefix('products')->middleware(StartSession::class)->group(function () {
+    Route::get('/', 'index');
+    Route::get('/{product}', 'show');
+});
+/** PRODUCTS END */

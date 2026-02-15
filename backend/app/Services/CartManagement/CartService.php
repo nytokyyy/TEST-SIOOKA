@@ -2,6 +2,8 @@
 
 namespace App\Services\CartManagement;
 
+use App\Enums\CartManagement\CartQuantityAction;
+use App\Exceptions\CartManagement\CartItemNotFoundException;
 use App\Models\CartManagement\Cart;
 use App\Models\CartManagement\Product;
 use App\Models\User;
@@ -85,5 +87,31 @@ class CartService
                 $sessionCart->delete();
             });
         }
+    }
+
+    public function changeProductQuantity(Cart $cart, int $productId, CartQuantityAction $action): Cart
+    {
+        return DB::transaction(function () use ($cart, $productId, $action) {
+            $cartItem = $cart->cartItems()
+                            ->where('product_id', $productId)
+                            ->lockForUpdate()
+                            ->first();
+
+            if (!$cartItem) {
+                throw new CartItemNotFoundException();
+            }
+
+            match ($action) {
+                CartQuantityAction::INCREMENT => 
+                    $cartItem->increment('quantity'),
+
+                CartQuantityAction::DECREMENT =>
+                    $cartItem->quantity <= 1
+                        ? $cartItem->delete()
+                        : $cartItem->decrement('quantity'),
+            };
+
+            return $cart->load('cartItems.product');
+        });
     }
 }

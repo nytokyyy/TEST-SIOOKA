@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterUserRequest;
 use App\Models\User;
 use App\Services\CartManagement\CartService;
 use Illuminate\Http\Request;
@@ -16,33 +18,32 @@ class UserAuthController extends Controller
     {
     }
 
-    public function register(Request $request){
-        $registerUserData = $request->validate([
-            'name'=>'required|string',
-            'email'=>'required|string|email|unique:users',
-            'password'=>'required|min:8'
+    public function register(RegisterUserRequest $request)
+    {
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
         ]);
 
-        $user = User::create([
-            'name' => $registerUserData['name'],
-            'email' => $registerUserData['email'],
-            'password' => Hash::make($registerUserData['password']),
-        ]);
+        $token = $user->createToken($user->name.'-AuthToken')->plainTextToken;
 
         return response()->json([
             'message' => 'User Created ',
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ]
         ]);
     }
 
-    public function login(Request $request){
-        $credentials = $request->validate([
-            'email'=>'required|string|email',
-            'password'=>'required'
-        ]);
-
-        $user = User::where('email',$credentials['email'])->first();
+    public function login(LoginRequest $request){
+        $user = User::where('email',$request->email)->first();
         
-        if(!$user || !Hash::check($credentials['password'],$user->password)){
+        if(!$user || !Hash::check($request->password,$user->password)){
             return response()->json([
                 'message' => 'Invalid Credentials'
             ],401);
