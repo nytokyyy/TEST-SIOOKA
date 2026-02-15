@@ -4,9 +4,7 @@ namespace App\Services\CartManagement;
 
 use App\Models\CartManagement\Cart;
 use App\Models\CartManagement\Product;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 class CartService
 {
@@ -42,7 +40,7 @@ class CartService
         return $cart->load('cartItems.product');
     }
 
-    public function getCurrentCart(Request $request): Cart
+    public function getCurrentCart(): Cart
     {
         if (Auth::check()) {
             return Cart::firstOrCreate([
@@ -50,11 +48,11 @@ class CartService
             ]);
         }
 
-        // For guests
-        $cartToken = $request->header('X-Cart-Token') ?? (string) Str::uuid();
+        // For guests, we can use session ID to track their cart
+        $sessionId = session()->getId();
 
         return Cart::firstOrCreate([
-            'session_id' => $cartToken,
+            'session_id' => $sessionId,
         ]);
     }
 }

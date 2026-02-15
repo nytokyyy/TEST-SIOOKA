@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\UserAuthController;
 use App\Http\Controllers\CartManagement\CartController;
 use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
@@ -21,7 +22,7 @@ Route::controller(UserAuthController::class)->group(function () {
 /** AUTH END */
 
 /** CART START */
-Route::controller(CartController::class)->prefix('cart')->group(function () {
+Route::controller(CartController::class)->prefix('cart')->middleware(StartSession::class)->group(function () {
     Route::get('/', 'show');
     Route::post('/add-product', 'addProduct');
     Route::delete('/remove-product/{product}', 'removeProduct');
