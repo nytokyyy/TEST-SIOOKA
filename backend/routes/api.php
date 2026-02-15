@@ -28,8 +28,9 @@ Route::controller(UserAuthController::class)->group(function () {
 /** CART START */
 Route::controller(CartController::class)->prefix('cart')->middleware(StartSession::class)->group(function () {
     Route::get('/', 'show');
-    Route::post('/add-product', 'addProduct');
-    Route::delete('/remove-product/{product}', 'removeProduct');
+    Route::post('/items', 'addProduct');
+    Route::patch('/items/{product}', 'changeQuantity');
+    Route::delete('/items/{product}', 'removeProduct');
 });
 /** CART END */
 
@@ -38,3 +39,4 @@ Route::controller(ProductController::class)->prefix('products')->middleware(Star
     Route::get('/', 'index');
     Route::get('/{product}', 'show');
 });
+/** PRODUCTS END */

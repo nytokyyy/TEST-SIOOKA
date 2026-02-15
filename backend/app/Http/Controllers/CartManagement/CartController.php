@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\CartManagement;
 
+use App\Enums\CartManagement\CartQuantityAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CartManagement\AddToCartRequest;
+use App\Http\Requests\CartManagement\ChangeCartQuantityRequest;
 use App\Http\Resources\CartManagement\CartResource;
 use App\Models\CartManagement\Product;
 use App\Services\CartManagement\CartService;
@@ -43,6 +45,15 @@ class CartController extends Controller
         $cart = $this->cartService->getCurrentCart($request);
 
         $cart = $this->cartService->removeProductFromCart($cart, $product);
+
+        return new CartResource($cart);
+    }
+
+    public function changeQuantity(ChangeCartQuantityRequest $request, Product $product): CartResource
+    {
+        $cart = $this->cartService->getCurrentCart($request);
+
+        $cart = $this->cartService->changeProductQuantity($cart, $product->id, CartQuantityAction::from($request->action));
 
         return new CartResource($cart);
     }
