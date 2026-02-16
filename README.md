@@ -11,11 +11,8 @@ Stack Technique
 - Git (Versioning) -> 2.43.0
 
 INSTALLATION
-* BACKEND
-- make install
-
-* FRONTEND
-- npm install
+* BACKEND : make install
+* FRONTEND : npm install
 
 DEFAULT
 - Utilisateur par defaut: john.doe@example.com / password
