@@ -1,17 +1,31 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useCartStore } from '@/stores/cartStore'
-import { RouterView, RouterLink } from 'vue-router'
+import { RouterView, RouterLink, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
 
 const cartStore = useCartStore()
+const authStore = useAuthStore()
+const router = useRouter()
 
 onMounted(() => {
+  cartStore.fetchCart()
+})
+
+watch(() => authStore.user, () => {
   cartStore.fetchCart()
 })
 
 const cartCount = computed(() =>
   cartStore.items.reduce((sum, item) => sum + item.quantity, 0)
 )
+
+const isAuthenticated = computed(() => !!authStore.user)
+
+const logout = async () => {
+  await authStore.logoutUser()
+  router.push('/')
+}
 </script>
 
 <template>
@@ -51,6 +65,27 @@ const cartCount = computed(() =>
               {{ cartCount }}
             </span>
           </RouterLink>
+
+          <template v-if="isAuthenticated">
+            <button
+              @click="logout"
+              class="text-red-600 hover:text-red-800 transition"
+            >
+              Déconnexion
+            </button>
+            <span class="text-gray-600">
+              ({{ authStore.user?.name }})
+            </span>
+          </template>
+
+          <template v-else>
+            <RouterLink
+              to="/login"
+              class="text-blue-600 hover:text-blue-800 transition"
+            >
+              Connexion
+            </RouterLink>
+          </template>
 
         </nav>
       </div>

@@ -16,3 +16,7 @@ export const addToCart = (productId, quantity = 1) => {
 export const getCart = () => {
   return axios.get('/cart')
 }
+
+export const removeFromCart = (productId) => {
+  return axios.delete(`/cart/items/${productId}`)
+}
