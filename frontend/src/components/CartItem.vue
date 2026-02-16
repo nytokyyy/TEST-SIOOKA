@@ -31,6 +31,13 @@ const cartStore = useCartStore()
             >
                 +
             </button>
+
+            <button
+                class="text-red-500 hover:text-red-700 transition"
+                @click="cartStore.removeItem(item.product.id)"
+            >
+                Supprimer
+            </button>
         </div>
     </div>
 </template>

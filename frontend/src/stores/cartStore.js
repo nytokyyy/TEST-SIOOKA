@@ -1,18 +1,12 @@
 import { defineStore } from 'pinia'
-import { getCart, updateCartQuantity, addToCart } from '@/api/cartManagement/cartApi'
+import { getCart, updateCartQuantity, addToCart, removeFromCart } from '@/api/cartManagement/cartApi'
 
 export const useCartStore = defineStore('cart', {
     state: () => ({
         items: [],
         loading: false,
+        totalPrice: 0
     }),
-
-    getters: {
-        totalPrice: (state) =>
-            state.items.reduce((sum, item) =>
-                sum + item.quantity * item.product.price, 0
-            )
-    },
 
     actions: {
         async fetchCart() {
@@ -20,6 +14,7 @@ export const useCartStore = defineStore('cart', {
             const { data } = await getCart()
             
             this.items = data.data.cartItems
+            this.totalPrice = data.data.total
             this.loading = false
         },
 
@@ -30,6 +25,11 @@ export const useCartStore = defineStore('cart', {
 
         async addToCart(productId, quantity = 1) {
             await addToCart(productId, quantity)
+            await this.fetchCart()
+        },
+
+        async removeItem(productId) {
+            await removeFromCart(productId)
             await this.fetchCart()
         }
     }
