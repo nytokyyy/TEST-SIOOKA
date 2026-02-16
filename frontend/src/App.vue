@@ -1,85 +1,64 @@
-<script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+<script setup>
+import { computed, onMounted } from 'vue'
+import { useCartStore } from '@/stores/cartStore'
+import { RouterView, RouterLink } from 'vue-router'
+
+const cartStore = useCartStore()
+
+onMounted(() => {
+  cartStore.fetchCart()
+})
+
+const cartCount = computed(() =>
+  cartStore.items.reduce((sum, item) => sum + item.quantity, 0)
+)
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <div class="min-h-screen bg-gray-100 flex flex-col">
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+    <!-- NAVBAR -->
+    <header class="bg-white shadow-md">
+      <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
+        <!-- Logo -->
+        <RouterLink
+          to="/"
+          class="text-2xl font-bold text-blue-600"
+        >
+          MyShop
+        </RouterLink>
 
-  <RouterView />
+        <!-- Navigation -->
+        <nav class="flex items-center gap-6">
+
+          <RouterLink
+            to="/"
+            class="hover:text-blue-600 transition"
+          >
+            Produits
+          </RouterLink>
+
+          <RouterLink
+            to="/cart"
+            class="relative hover:text-blue-600 transition"
+          >
+            Panier
+            <span
+              v-if="cartCount > 0"
+              class="absolute -top-2 -right-4 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full"
+            >
+              {{ cartCount }}
+            </span>
+          </RouterLink>
+
+        </nav>
+      </div>
+    </header>
+
+    <main class="flex-1 max-w-6xl mx-auto w-full px-6 py-8">
+      <RouterView />
+    </main>
+
+  </div>
 </template>
-
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
-</style>
